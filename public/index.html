@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Loan Calculator</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #1a3a5c;
+            color: white;
+            padding: 18px 40px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card h2 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #1a3a5c;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 18px;
+            border-bottom: 2px solid #e8edf2;
+            padding-bottom: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        label {
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: #556;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap .prefix,
+        .input-wrap .suffix {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 0.88rem;
+            pointer-events: none;
+        }
+
+        .input-wrap .prefix { left: 10px; }
+        .input-wrap .suffix { right: 10px; }
+
+        .input-wrap input,
+        .input-wrap select {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #d0d5dd;
+            border-radius: 6px;
+            font-size: 0.93rem;
+            color: #333;
+            background: #fff;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .input-wrap.has-prefix input { padding-left: 24px; }
+        .input-wrap.has-suffix input { padding-right: 28px; }
+
+        .input-wrap input:focus,
+        .input-wrap select:focus {
+            outline: none;
+            border-color: #1a3a5c;
+            box-shadow: 0 0 0 3px rgba(26,58,92,0.1);
+        }
+
+        .form-actions {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            background: #1a3a5c;
+            color: white;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 6px;
+            font-size: 0.93rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .btn:hover { background: #0f2540; }
+
+        .btn-secondary {
+            background: #e8edf2;
+            color: #1a3a5c;
+        }
+
+        .btn-secondary:hover { background: #d0dae4; }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+
+        .summary-item {
+            background: #f6f9fc;
+            border-radius: 6px;
+            padding: 14px 16px;
+            border-left: 3px solid #1a3a5c;
+        }
+
+        .summary-item .lbl {
+            font-size: 0.73rem;
+            color: #778;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 6px;
+        }
+
+        .summary-item .val {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1a3a5c;
+        }
+
+        .extra-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .savings-banner {
+            background: #e8f5e9;
+            border: 1px solid #a5d6a7;
+            border-radius: 6px;
+            padding: 9px 14px;
+            color: #2e7d32;
+            font-weight: 500;
+            font-size: 0.88rem;
+        }
+
+        .hidden { display: none; }
+
+        .error-msg {
+            background: #fdecea;
+            border: 1px solid #f5c6c2;
+            border-radius: 6px;
+            padding: 9px 14px;
+            color: #c0392b;
+            font-size: 0.88rem;
+            margin-top: 12px;
+        }
+
+        .table-wrap { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.86rem;
+        }
+
+        thead th {
+            background: #1a3a5c;
+            color: white;
+            padding: 10px 12px;
+            text-align: right;
+            font-weight: 600;
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        thead th:first-child,
+        thead th:nth-child(2) { text-align: left; }
+
+        tbody tr { transition: background 0.1s; }
+        tbody tr:nth-child(even) { background: #f8fafc; }
+        tbody tr:hover { background: #eef3f8; }
+
+        tbody td {
+            padding: 8px 12px;
+            text-align: right;
+            border-bottom: 1px solid #edf0f3;
+            color: #445;
+            white-space: nowrap;
+        }
+
+        tbody td:first-child,
+        tbody td:nth-child(2) { text-align: left; }
+
+        tbody tr.last-row td {
+            font-weight: 700;
+            color: #1a3a5c;
+            background: #eef3f8;
+        }
+
+        @media (max-width: 800px) {
+            .form-grid { grid-template-columns: 1fr 1fr; }
+            .summary-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 480px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .summary-grid { grid-template-columns: 1fr; }
+            header { padding: 14px 16px; font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>Car Loan Calculator</header>
+
+<div class="container">
+
+    <!-- Input Form -->
+    <div class="card">
+        <h2>Loan Details</h2>
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label for="car_cost">Car Cost</label>
+                <div class="input-wrap has-prefix">
+                    <span class="prefix">$</span>
+                    <input type="number" id="car_cost" min="0" step="100" placeholder="35,000">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="tax_rate">Sales Tax Rate</label>
+                <div class="input-wrap has-suffix">
+                    <input type="number" id="tax_rate" min="0" max="20" step="0.001" placeholder="6.625">
+                    <span class="suffix">%</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="dealer_fees">Dealer Fees</label>
+                <div class="input-wrap has-prefix">
+                    <span class="prefix">$</span>
+                    <input type="number" id="dealer_fees" min="0" step="50" placeholder="500" value="0">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="down_payment">Down Payment</label>
+                <div class="input-wrap has-prefix">
+                    <span class="prefix">$</span>
+                    <input type="number" id="down_payment" min="0" step="100" placeholder="5,000" value="0">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="term_months">Loan Term</label>
+                <div class="input-wrap">
+                    <select id="term_months">
+                        <option value="24" data-rate="3.74">24 Months &mdash; 3.74%</option>
+                        <option value="36" data-rate="3.99">36 Months &mdash; 3.99%</option>
+                        <option value="48" data-rate="4.24">48 Months &mdash; 4.24%</option>
+                        <option value="60" data-rate="4.49" selected>60 Months &mdash; 4.49%</option>
+                        <option value="72" data-rate="4.74">72 Months &mdash; 4.74%</option>
+                        <option value="84" data-rate="4.99">84 Months &mdash; 4.99%</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="annual_rate">Interest Rate</label>
+                <div class="input-wrap has-suffix">
+                    <input type="number" id="annual_rate" min="0" max="30" step="0.01" placeholder="4.49">
+                    <span class="suffix">%</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="start_date">Loan Start Date</label>
+                <div class="input-wrap">
+                    <input type="date" id="start_date">
+                </div>
+            </div>
+
+        </div>
+
+        <div id="error-msg" class="error-msg hidden"></div>
+
+        <div class="form-actions">
+            <button class="btn" onclick="calculate()">Calculate</button>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div id="results" class="hidden">
+
+        <div class="card">
+            <h2>Loan Summary</h2>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="lbl">Loan Amount</div>
+                    <div class="val" id="sum-loan-amount"></div>
+                </div>
+                <div class="summary-item">
+                    <div class="lbl">Monthly Payment</div>
+                    <div class="val" id="sum-monthly"></div>
+                </div>
+                <div class="summary-item">
+                    <div class="lbl">Total Interest</div>
+                    <div class="val" id="sum-interest"></div>
+                </div>
+                <div class="summary-item">
+                    <div class="lbl">Total Cost of Loan</div>
+                    <div class="val" id="sum-total"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Extra Principal Payment</h2>
+            <div class="extra-row">
+                <div class="form-group">
+                    <label for="extra_monthly">Additional Monthly Principal</label>
+                    <div class="input-wrap has-prefix" style="width:160px">
+                        <span class="prefix">$</span>
+                        <input type="number" id="extra_monthly" min="0" step="50" value="0">
+                    </div>
+                </div>
+                <button class="btn btn-secondary" onclick="applyExtra()">Recalculate</button>
+                <div id="savings-banner" class="savings-banner hidden"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Amortization Schedule</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Date</th>
+                            <th>Payment</th>
+                            <th>Principal</th>
+                            <th>Interest</th>
+                            <th>Extra</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="schedule-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const LOAN_TERMS = {"24": 3.74, "36": 3.99, "48": 4.24, "60": 4.49, "72": 4.74, "84": 4.99};
+    let baseResult = null;
+
+    // Set default start date to today
+    const today = new Date();
+    document.getElementById('start_date').value =
+        today.toISOString().slice(0, 10);
+
+    // Auto-fill rate when term changes
+    document.getElementById('term_months').addEventListener('change', function () {
+        const rate = LOAN_TERMS[this.value];
+        if (rate !== undefined) {
+            document.getElementById('annual_rate').value = rate;
+        }
+    });
+    document.getElementById('term_months').dispatchEvent(new Event('change'));
+
+    function round2(n) {
+        return Math.round(n * 100) / 100;
+    }
+
+    // Mirrors Python's add_months() — clamps to last day of month on overflow
+    function addMonths(dateStr, months) {
+        const [y, m, d] = dateStr.split('-').map(Number);
+        const totalMonths = (m - 1) + months;
+        const ty = y + Math.floor(totalMonths / 12);
+        const tm = totalMonths % 12 + 1; // 1-based
+        const lastDay = new Date(Date.UTC(ty, tm, 0)).getUTCDate();
+        const td = Math.min(d, lastDay);
+        return `${ty}-${String(tm).padStart(2, '0')}-${String(td).padStart(2, '0')}`;
+    }
+
+    function calculateLoan(carCost, taxRate, dealerFees, downPayment, annualRate, termMonths, startDate, extraMonthly = 0) {
+        const loanAmount = (carCost * (1 + taxRate / 100)) + dealerFees - downPayment;
+
+        if (loanAmount <= 0) return { error: 'Down payment exceeds the financed amount.' };
+
+        const r = annualRate / 100 / 12;
+        const n = termMonths;
+
+        const monthlyPayment = r === 0
+            ? loanAmount / n
+            : loanAmount * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+
+        const schedule = [];
+        let balance = loanAmount;
+        let totalInterest = 0;
+
+        for (let i = 1; i <= n; i++) {
+            if (balance <= 0.005) break;
+
+            const paymentDate = addMonths(startDate, i);
+            const interest = balance * r;
+            let principal = monthlyPayment - interest;
+            let extra, actualPayment;
+
+            if (principal + extraMonthly >= balance) {
+                principal = balance;
+                extra = 0;
+                actualPayment = principal + interest;
+            } else {
+                extra = extraMonthly;
+                actualPayment = monthlyPayment;
+            }
+
+            balance -= (principal + extra);
+            totalInterest += interest;
+
+            schedule.push({
+                num: i,
+                date: paymentDate,
+                payment:   round2(actualPayment),
+                principal: round2(principal),
+                interest:  round2(interest),
+                extra:     round2(extra),
+                balance:   round2(Math.max(balance, 0)),
+            });
+
+            if (balance <= 0.005) break;
+        }
+
+        return {
+            loan_amount:     round2(loanAmount),
+            monthly_payment: round2(monthlyPayment),
+            total_interest:  round2(totalInterest),
+            total_cost:      round2(loanAmount + totalInterest),
+            payoff_months:   schedule.length,
+            schedule,
+        };
+    }
+
+    function fmt(n) {
+        return '$' + Number(n).toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function showError(msg) {
+        const el = document.getElementById('error-msg');
+        el.textContent = msg;
+        el.classList.remove('hidden');
+    }
+
+    function clearError() {
+        document.getElementById('error-msg').classList.add('hidden');
+    }
+
+    function getInputs() {
+        return {
+            carCost:     parseFloat(document.getElementById('car_cost').value)     || 0,
+            taxRate:     parseFloat(document.getElementById('tax_rate').value)     || 0,
+            dealerFees:  parseFloat(document.getElementById('dealer_fees').value)  || 0,
+            downPayment: parseFloat(document.getElementById('down_payment').value) || 0,
+            annualRate:  parseFloat(document.getElementById('annual_rate').value)  || 0,
+            termMonths:  parseInt(document.getElementById('term_months').value),
+            startDate:   document.getElementById('start_date').value,
+        };
+    }
+
+    function renderSummary(r) {
+        document.getElementById('sum-loan-amount').textContent = fmt(r.loan_amount);
+        document.getElementById('sum-monthly').textContent     = fmt(r.monthly_payment);
+        document.getElementById('sum-interest').textContent    = fmt(r.total_interest);
+        document.getElementById('sum-total').textContent       = fmt(r.total_cost);
+    }
+
+    function renderSchedule(schedule) {
+        const tbody = document.getElementById('schedule-body');
+        tbody.innerHTML = '';
+        schedule.forEach((row, idx) => {
+            const tr = document.createElement('tr');
+            if (idx === schedule.length - 1) tr.classList.add('last-row');
+            tr.innerHTML =
+                `<td>${row.num}</td>` +
+                `<td>${row.date}</td>` +
+                `<td>${fmt(row.payment)}</td>` +
+                `<td>${fmt(row.principal)}</td>` +
+                `<td>${fmt(row.interest)}</td>` +
+                `<td>${row.extra > 0 ? fmt(row.extra) : '&mdash;'}</td>` +
+                `<td>${fmt(row.balance)}</td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function calculate() {
+        clearError();
+        const inp = getInputs();
+
+        if (!inp.carCost)   return showError('Please enter the car cost.');
+        if (!inp.startDate) return showError('Please select a start date.');
+
+        const result = calculateLoan(
+            inp.carCost, inp.taxRate, inp.dealerFees, inp.downPayment,
+            inp.annualRate, inp.termMonths, inp.startDate, 0
+        );
+        if (result.error) return showError(result.error);
+
+        baseResult = result;
+        document.getElementById('extra_monthly').value = 0;
+        document.getElementById('savings-banner').classList.add('hidden');
+
+        renderSummary(result);
+        renderSchedule(result.schedule);
+        document.getElementById('results').classList.remove('hidden');
+        document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function applyExtra() {
+        if (!baseResult) return;
+        clearError();
+
+        const inp   = getInputs();
+        const extra = parseFloat(document.getElementById('extra_monthly').value) || 0;
+        const result = calculateLoan(
+            inp.carCost, inp.taxRate, inp.dealerFees, inp.downPayment,
+            inp.annualRate, inp.termMonths, inp.startDate, extra
+        );
+        if (result.error) return showError(result.error);
+
+        renderSummary(result);
+        renderSchedule(result.schedule);
+
+        const banner = document.getElementById('savings-banner');
+        if (extra > 0) {
+            const savedMonths   = baseResult.payoff_months - result.payoff_months;
+            const savedInterest = baseResult.total_interest - result.total_interest;
+            const parts = [];
+            if (savedMonths > 0)
+                parts.push(`${savedMonths} month${savedMonths !== 1 ? 's' : ''} sooner`);
+            if (savedInterest > 0.005)
+                parts.push(`${fmt(savedInterest)} in interest saved`);
+            banner.textContent = parts.length ? '✓ ' + parts.join(' · ') : '✓ Applied';
+            banner.classList.remove('hidden');
+        } else {
+            banner.classList.add('hidden');
+            renderSummary(baseResult);
+            renderSchedule(baseResult.schedule);
+        }
+    }
+</script>
+
+</body>
+</html>
